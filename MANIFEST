@@ -1,0 +1,7 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Net-Int-Stats.t
+lib/Net/Int/Stats.pm
+META.yml                                 Module meta-data (added by MakeMaker)
