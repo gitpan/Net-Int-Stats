@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use strict;
 use warnings;
@@ -254,7 +254,7 @@ rx_dropped()
 rx_overruns()
 rx_frame()
 tx_packets()
-trx_errors()
+tx_errors()
 tx_dropped()
 tx_overruns()
 tx_carrier()
