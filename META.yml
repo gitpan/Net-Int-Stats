@@ -1,10 +1,10 @@
 --- #YAML:1.0
 name:                Net-Int-Stats
-version:             1.02
+version:             1.03
 abstract:            Reports specific ifconfig values for a network interface
 license:             ~
 author:              
-    - A. U. Thor <home@localdomain>
+    - Bruce Burch <bcb12001@yahoo.com>
 generated_by:        ExtUtils::MakeMaker version 6.42
 distribution_type:   module
 requires:     

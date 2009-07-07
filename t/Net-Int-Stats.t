@@ -3,7 +3,10 @@
 
 #########################
 
-use Test::More tests => 4;
+use Test::More tests => 5;
+
+# test if linux platform
+ok($^O =~ /linux/, 'OS check') || BAIL_OUT("Operating system is $^O instead of linux!");
 
 # does /sbin/ifconfig exist?
 ok(-e '/sbin/ifconfig', '/sbin/ifconfig test') || BAIL_OUT('Does /sbin/ifconfig exist?'); 
@@ -20,3 +23,4 @@ my @methods = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame
 		 tx_packets tx_errors tx_dropped tx_overruns tx_carrier
 		 collisions txqueuelen);
 can_ok($obj, @methods);
+
