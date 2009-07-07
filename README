@@ -40,7 +40,7 @@ amount of data the default command outputs.
 
 SEE ALSO
 
-unix command /sbin/ifconfig
+linux command /sbin/ifconfig
 
 NOTES
 

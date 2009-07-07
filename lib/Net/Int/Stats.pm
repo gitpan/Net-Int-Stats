@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use strict;
 use warnings;
@@ -230,7 +230,7 @@ Net::Int::Stats - Reports specific ifconfig values for a network interface
 
   use Net::Int::Stats;
 
-  my $get     = Net::Int::Stats->new();
+  my $get = Net::Int::Stats->new();
 
   # get value for specific interface
   # ex: $int  = 'eth0';
@@ -243,7 +243,7 @@ RX values consist of packets, errors, dropped, overrruns, and frame. TX values c
 errors, dropped, overruns, and carrier. In addition, collisions and txqueuelen are reported. Values 
 are in the format of type:n - ex 'packets:123456'.
 
-=head2 METHODS
+=head1 METHODS
 
 Use these methods to get specific values.
 Ex: $value = $get->rx_packets($int);
