@@ -10,12 +10,13 @@ SYNOPSIS
     my $get = Net::Int::Stats->new();
 
     # get value for specific interface
-    # ex: $int  = 'eth0';
-    my $packets = $get->rx_packets($int);
+    my $int     = 'eth0';
+    my $stat	= 'rx_packets';
+    my $packets = $get->value($int, $stat);
 
 DESCRIPTION
     This module provides various statistics generated from the ifconfig command for specific interfaces. 
-    RX values consist of packets, errors, dropped, overrruns, and frame. TX values consist of packets, 
+    RX values consist of packets, errors, dropped, overruns, and frame. TX values consist of packets, 
     errors, dropped, overruns, and carrier. In addition, collisions and txqueuelen are reported. Values 
     are in the format of type:n - ex 'packets:123456'.
 
@@ -33,7 +34,7 @@ DEPENDENCIES
 This module is platform dependent. It uses the linux version
 of /sbin/ifconfig. Other platforms such as the windows equivalent
 of ipconfig, mac osx, and other versions of unix are not supported. 
-This is due the fact that each platform generates and displays
+This is due to the fact that each platform generates and displays
 different information in different formats of ifconfig results.
 The linux version is used over the other platforms because of the 
 amount of data the default command outputs.

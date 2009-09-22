@@ -1,221 +1,101 @@
 package Net::Int::Stats;
 
-our $VERSION = '1.03';
+our $VERSION = '2.0';
 
 use strict;
 use warnings;
 
 # store ifconfig output
 my @interface = `/sbin/ifconfig`;
-# RX key
-my $rx        = 'RX';
-# TX key
-my $tx        = 'TX';
-# key for collisions and txqueuelen
-my $coll      = 'collisions';
-# hash of hash of arrays
-# key1 - interface, key2 - type ex: 'RX', list - values ex: 'packets:12345'
+# hash of hashes
+# key1 - interface, key2 - type ex: rx_packets, values ex: 'packets:12345'
 my %interfaces;
 # tmp array to store string tokens
 my @tmp;
 # interface name
 my $key1;
-# type - ex: 'TX'
-my $key2;
+# key2
+my @key2;
 
 # loop through each line of ifconfig output
 foreach (@interface){
 	# skip if blank
-        next if /^$/;
+    next if /^$/;
 
+	# get interface
 	# if not space
-        if (!/^\s/){
-		# remove spaces
-                $_    =~ s/^\s+//;
-		# store tokens split on spaces
-                @tmp  = split (/\s/, $_);
+    if (!/^\s/){
+		# extract values
+		extract($_);
 		# store first token of interface name
-                $key1 = shift(@tmp);
-        }
+        $key1 = shift(@tmp);
+    }
 
-	# look for 'RX' or 'TX' text
-        if (/RX packets/ || /TX packets/){
-		# remove spaces
-                $_    =~ s/^\s+//;
-		# store tokens split on spaces
-                @tmp  = split (/\s/, $_);
-		# store first token of RX or TX
-                $key2 = shift(@tmp);
+	# get RX, TX, collisions and txqueuelen values
+	# look for 'RX' or 'TX' or 'collisions' text
+    if (/RX packets/ || /TX packets/ || /collisions/){
+		# key2 values
+        @key2 = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame) if (/RX packets/);
+		@key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
+		@key2 = qw(collisions txqueuelen) if (/collisions/);
+		# extract values
+		extract($_);
+		# shift first token of 'RX' or 'TX'
+        shift(@tmp) if (/RX packets/ || /TX packets/);
 		# build hash
-                push(@{$interfaces{$key1}{$key2}}, @tmp);
-        }
+		build();
+	}
+}
 
-	# look for 'collisions' text
-        if (/collisions/){
-		# remove spaces
-                $_    =~ s/^\s+//;
-		# store tokens split on spaces
-                @tmp  = split (/\s/, $_);
-		# assign 'collisions' as $key2
-                $key2 = 'collisions';
-		# build hash
-                push(@{$interfaces{$key1}{$key2}}, @tmp);
-        }
+# extract values
+sub extract {
+	my $line = shift;
+	# remove spaces
+    $line =~ s/^\s+//;
+    # store tokens split on spaces
+    @tmp = split (/\s/, $line);
+}
+
+# build values hash
+sub build {
+	my $i = 0;
+    for (@key2){
+    	$interfaces{$key1}{$_} = $tmp[$i];
+        $i++;
+    }
 }
 
 # validate interface name
 sub validate {
 	# interface name
-        my $int = shift;
+    my $int = shift;
 	# terminate program if specified interface name is not in ifconfig output
-        die "specified interface $int not listed in ifconfig!\n" if !(grep(/$int/, keys %interfaces));
+    die "specified interface $int not listed in ifconfig!\n" if !(grep(/$int/, keys %interfaces));
 }
 
 # create new Net::Int::Stats object
 sub new {
-        my $class = shift;
-        my $self  = {};
+	my $class = shift;
+    my $self  = {};
 
-        bless($self, $class);
+    bless($self, $class);
+    $self->{VALUE} = '';
 
-	# initialize object instances
-        $self->_init();
-
-        return $self;
+    return $self;
 }
 
-# initialize object instances
-sub _init {
-        my $self         = shift;
-	# first method list
-        my @method_list1 = qw(RX_PACKETS RX_ERRORS RX_DROPPED RX_OVERRUNS RX_FRAME
-                              TX_PACKETS TX_ERRORS TX_DROPPED TX_OVERRUNS TX_CARRIER);
-	# second method list
-        my @method_list2 = qw(COLLISIONS TXQUEUELEN);
+# get specific ifconfig value for specific interface
+sub value {
+    my $self = shift;
+    my $int  = shift;
+    my $type = shift;
 
-	# intialize first method list
-        foreach (@method_list1){
-                $self->{$_} = '';
-        }
-
-	# initialize second method list
-        foreach (@method_list2){
-                $self->{$_} = '';
-        }
-}
-
-# The methods all follow the same format: 
-# 1. The interface name is passed and stored in $int
-# 2. $int is validated for a match against ifconfig output
-# 3. The object instance is set using $int
-# 4. The value is returned
-
-# get rx packets
-sub rx_packets {
-        my $self = shift;
-        my $int  = shift;
+	# validate if supplied interface is present
 	validate($int);
-        $self->{RX_PACKETS} = $interfaces{$int}{$rx}[0];
-        return $self->{RX_PACKETS};
-}
 
-# get rx errors
-sub rx_errors{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{RX_ERRORS} = $interfaces{$int}{$rx}[1];
-        return $self->{RX_ERRORS};
-}
+	$self->{VALUES} = $interfaces{$int}{$type};
 
-# get rx dropped
-sub rx_dropped{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{RX_DROPPED} = $interfaces{$int}{$rx}[2];
-        return $self->{RX_DROPPED};
-}
-
-# get rx overruns
-sub rx_overruns{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{RX_OVERRUNS} = $interfaces{$int}{$rx}[3];
-        return $self->{RX_OVERRUNS};
-}
-
-# get rx frame
-sub rx_frame{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{RX_FRAME} = $interfaces{$int}{$rx}[4];
-        return $self->{RX_FRAME};
-}
-
-# get tx packets
-sub tx_packets{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TX_PACKETS} = $interfaces{$int}{$tx}[0];
-        return $self->{TX_PACKETS};
-}
-
-# get tx errors
-sub tx_errors{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TX_ERRORS} = $interfaces{$int}{$tx}[1];
-        return $self->{TX_ERRORS};
-}
-
-# get tx dropped
-sub tx_dropped{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TX_DROPPED} = $interfaces{$int}{$tx}[2];
-        return $self->{TX_DROPPED};
-}
-
-# get tx overruns
-sub tx_overruns{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TX_OVERRUNS} = $interfaces{$int}{$tx}[3];
-        return $self->{TX_OVERRUNS};
-}
-
-# get tx carrier
-sub tx_carrier{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TX_CARRIER} = $interfaces{$int}{$tx}[4];
-        return $self->{TX_CARRIER};
-}
-
-# get collisions
-sub collisions{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{COLLISIONS} = $interfaces{$int}{$coll}[0];
-        return $self->{COLLISIONS};
-}
-
-# get txqueuelen
-sub txqueuelen{
-        my $self = shift;
-        my $int  = shift;
-	validate($int);
-        $self->{TXQUEUELEN} = $interfaces{$int}{$coll}[1];
-        return $self->{TXQUEUELEN};
+    return $self->{VALUES};
 }
 
 1;
@@ -233,40 +113,33 @@ Net::Int::Stats - Reports specific ifconfig values for a network interface
   my $get = Net::Int::Stats->new();
 
   # get value for specific interface
-  # ex: $int  = 'eth0';
-  my $packets = $get->rx_packets($int);
+  my $int     = 'eth0';
+  my $stat    = 'rx_packets';
+  my $packets = $get->rx_packets($int, $stat);
 
 =head1 DESCRIPTION
 
 This module provides various statistics generated from the ifconfig command for specific interfaces. 
-RX values consist of packets, errors, dropped, overrruns, and frame. TX values consist of packets, 
+RX values consist of packets, errors, dropped, overruns, and frame. TX values consist of packets, 
 errors, dropped, overruns, and carrier. In addition, collisions and txqueuelen are reported. Values 
 are in the format of type:n - ex 'packets:123456'.
 
 =head1 METHODS
 
-Use these methods to get specific values.
-Ex: $value = $get->rx_packets($int);
+Use this one method to get specific values which requires two arguments: value().
+Ex: $packets = $get->value($int, 'rx_packets');
 
-rx_packets()
-rx_errors()
-rx_dropped()
-rx_overruns()
-rx_frame()
-tx_packets()
-tx_errors()
-tx_dropped()
-tx_overruns()
-tx_carrier()
-collisions()
-txqueuelen()
+The first argument is the interface and the second is the value type to extract:
+RX values - rx_packets, rx_errors, rx_dropped, rx_overruns, rx_frame
+TX values - tx_packets, tx_errors, tx_dropped, tx_overruns, tx_carrier
+remaining values - collisions, txqueuelen
 
 =head1 DEPENDENCIES
 
 This module is platform dependent. It uses the linux version
 of /sbin/ifconfig. Other platforms such as the windows equivalent
 of ipconfig, mac osx, and other versions of unix are not supported. 
-This is due the fact that each platform generates and displays
+This is due to the fact that each platform generates and displays
 different information in different formats of ifconfig results.
 The linux version is used over the other platforms because of the 
 amount of data the default command outputs.  

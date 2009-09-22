@@ -19,8 +19,6 @@ my $obj = Net::Int::Stats->new();
 isa_ok($obj, 'Net::Int::Stats');
 
 # check method interface
-my @methods = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame
-		 tx_packets tx_errors tx_dropped tx_overruns tx_carrier
-		 collisions txqueuelen);
+my @methods = qw(value);
 can_ok($obj, @methods);
 

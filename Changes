@@ -8,3 +8,12 @@ Revision history for Perl extension Net::Int::Stats.
 
 1.03 Tues Jul 07 12:28:00 2009
 	- added operating system check for make test
+
+2.0  Tues Sep 22 11:30:00 2009
+	- major code revision
+	- still performs the same purpose
+	- one method now replaces the previous twelve
+	- the user now has to supply two arguments instead of one
+	- not quite as user friendly as before with the extra 
+	- argument but the code has been tightened up considerably
+	- the extracting of values has been refactored
