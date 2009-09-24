@@ -17,3 +17,9 @@ Revision history for Perl extension Net::Int::Stats.
 	- not quite as user friendly as before with the extra 
 	- argument but the code has been tightened up considerably
 	- the extracting of values has been refactored
+
+2.01 Thurs Sep 24 13:38:00 2009
+	- minor administrative changes
+	- updated version in README to 2.0
+	- fixed indenting in code
+	- small change in pod doc methods section

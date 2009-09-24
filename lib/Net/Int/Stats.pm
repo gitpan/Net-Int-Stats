@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.0';
+our $VERSION = '2.01';
 
 use strict;
 use warnings;
@@ -126,13 +126,16 @@ are in the format of type:n - ex 'packets:123456'.
 
 =head1 METHODS
 
-Use this one method to get specific values which requires two arguments: value().
+Use this one method to get specific values which requires two arguments: B<value()>.
 Ex: $packets = $get->value($int, 'rx_packets');
 
-The first argument is the interface and the second is the value type to extract:
+The first argument is the interface and the second is the type value to extract.
+
 RX values - rx_packets, rx_errors, rx_dropped, rx_overruns, rx_frame
+
 TX values - tx_packets, tx_errors, tx_dropped, tx_overruns, tx_carrier
-remaining values - collisions, txqueuelen
+
+Miscellaneous values - collisions, txqueuelen
 
 =head1 DEPENDENCIES
 
