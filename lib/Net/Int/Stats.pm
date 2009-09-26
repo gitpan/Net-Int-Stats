@@ -1,81 +1,100 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.01';
+our $VERSION = '2.02';
 
 use strict;
 use warnings;
 
 # store ifconfig output
 my @interface = `/sbin/ifconfig`;
+
 # hash of hashes
 # key1 - interface, key2 - type ex: rx_packets, values ex: 'packets:12345'
 my %interfaces;
+
 # tmp array to store string tokens
 my @tmp;
+
 # interface name
 my $key1;
+
 # key2
 my @key2;
 
 # loop through each line of ifconfig output
 foreach (@interface){
-	# skip if blank
+
+    # skip if blank
     next if /^$/;
 
-	# get interface
-	# if not space
+    # get interface
+    # if not space
     if (!/^\s/){
-		# extract values
-		extract($_);
-		# store first token of interface name
+
+        # extract values
+        extract($_);
+
+        # store first token of interface name
         $key1 = shift(@tmp);
     }
 
-	# get RX, TX, collisions and txqueuelen values
-	# look for 'RX' or 'TX' or 'collisions' text
+    # get RX, TX, collisions and txqueuelen values
+    # look for 'RX' or 'TX' or 'collisions' text
     if (/RX packets/ || /TX packets/ || /collisions/){
-		# key2 values
+
+        # key2 values
         @key2 = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame) if (/RX packets/);
-		@key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
-		@key2 = qw(collisions txqueuelen) if (/collisions/);
-		# extract values
-		extract($_);
-		# shift first token of 'RX' or 'TX'
+        @key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
+        @key2 = qw(collisions txqueuelen) if (/collisions/);
+
+        # extract values
+        extract($_);
+
+        # shift first token of 'RX' or 'TX'
         shift(@tmp) if (/RX packets/ || /TX packets/);
-		# build hash
-		build();
-	}
+
+        # build hash
+        build();
+    }
 }
 
 # extract values
 sub extract {
-	my $line = shift;
-	# remove spaces
+
+    my $line = shift;
+
+    # remove spaces
     $line =~ s/^\s+//;
+
     # store tokens split on spaces
     @tmp = split (/\s/, $line);
 }
 
 # build values hash
 sub build {
-	my $i = 0;
+
+    my $i = 0;
+
     for (@key2){
-    	$interfaces{$key1}{$_} = $tmp[$i];
+        $interfaces{$key1}{$_} = $tmp[$i];
         $i++;
     }
 }
 
 # validate interface name
 sub validate {
-	# interface name
+
+    # interface name
     my $int = shift;
-	# terminate program if specified interface name is not in ifconfig output
+
+    # terminate program if specified interface name is not in ifconfig output
     die "specified interface $int not listed in ifconfig!\n" if !(grep(/$int/, keys %interfaces));
 }
 
 # create new Net::Int::Stats object
 sub new {
-	my $class = shift;
+
+    my $class = shift;
     my $self  = {};
 
     bless($self, $class);
@@ -86,14 +105,15 @@ sub new {
 
 # get specific ifconfig value for specific interface
 sub value {
+
     my $self = shift;
     my $int  = shift;
     my $type = shift;
 
-	# validate if supplied interface is present
-	validate($int);
+    # validate if supplied interface is present
+    validate($int);
 
-	$self->{VALUES} = $interfaces{$int}{$type};
+    $self->{VALUES} = $interfaces{$int}{$type};
 
     return $self->{VALUES};
 }

@@ -23,3 +23,10 @@ Revision history for Perl extension Net::Int::Stats.
 	- updated version in README to 2.0
 	- fixed indenting in code
 	- small change in pod doc methods section
+
+2.02 Sat Sep 26 15:04:00 2009
+	- no functionality changes
+	- prior code indentation fix didn't work
+	- could have left as is but it's not great for readability
+	- used spaces instead of tabs to overcome different tab defaults
+	- between vi configs
