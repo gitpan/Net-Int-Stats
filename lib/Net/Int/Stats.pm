@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 use strict;
 use warnings;
@@ -135,7 +135,7 @@ Net::Int::Stats - Reports specific ifconfig values for a network interface
   # get value for specific interface
   my $int     = 'eth0';
   my $stat    = 'rx_packets';
-  my $packets = $get->rx_packets($int, $stat);
+  my $packets = $get->value($int, $stat);
 
 =head1 DESCRIPTION
 

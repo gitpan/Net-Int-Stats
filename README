@@ -1,5 +1,5 @@
-Net-Int-Stats version 2.0
-==========================
+Net-Int-Stats version 2.03
+===========================
 
 NAME
     Net::Int::Stats - Reports specific ifconfig values for a network interface

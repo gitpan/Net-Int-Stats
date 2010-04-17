@@ -30,3 +30,9 @@ Revision history for Perl extension Net::Int::Stats.
 	- could have left as is but it's not great for readability
 	- used spaces instead of tabs to overcome different tab defaults
 	- between vi configs
+
+2.03 Fri Apr 16 16:20:44 PDT 2010
+	- no functionality changes
+	- fixed typo in synopsis
+	- updated version in README
+
