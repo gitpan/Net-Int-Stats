@@ -36,3 +36,8 @@ Revision history for Perl extension Net::Int::Stats.
 	- fixed typo in synopsis
 	- updated version in README
 
+2.04 Sat Jul  2 16:05:38 PDT 2011
+	- no functionality changes
+	- added more comments
+	- refactored part of code that generates the values data
+	- placed in it's own subroutine: data()

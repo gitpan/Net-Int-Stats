@@ -1,4 +1,4 @@
-Net-Int-Stats version 2.03
+Net-Int-Stats version 2.04
 ===========================
 
 NAME
@@ -46,8 +46,8 @@ linux command /sbin/ifconfig
 NOTES
 
 ifconfig output contains more information than the values that are
-extracted in this module. More values can be added if there are any 
-requests to do so.
+extracted in this module. More values and/or support for other
+operating systems can be added if there are any requests to do so.
 
 COPYRIGHT AND LICENSE
 

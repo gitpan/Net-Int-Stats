@@ -1,9 +1,11 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 use strict;
 use warnings;
+
+############ Global Declarations ##############
 
 # store ifconfig output
 my @interface = `/sbin/ifconfig`;
@@ -18,49 +20,55 @@ my @tmp;
 # interface name
 my $key1;
 
-# key2
+# value types
 my @key2;
 
-# loop through each line of ifconfig output
-foreach (@interface){
+########## End Global Declarations ###########
 
-    # skip if blank
-    next if /^$/;
+# generate ifconfig values
+sub data {
 
-    # get interface
-    # if not space
-    if (!/^\s/){
+	# loop through each line of ifconfig output
+	foreach (@interface){
 
-        # extract values
-        extract($_);
+    	# skip if blank line
+	    next if /^$/;
 
-        # store first token of interface name
-        $key1 = shift(@tmp);
-    }
+    	# get interface name if not white space
+	    if (!/^\s/){
 
-    # get RX, TX, collisions and txqueuelen values
-    # look for 'RX' or 'TX' or 'collisions' text
-    if (/RX packets/ || /TX packets/ || /collisions/){
+    	    # extract values
+        	extract($_);
 
-        # key2 values
-        @key2 = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame) if (/RX packets/);
-        @key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
-        @key2 = qw(collisions txqueuelen) if (/collisions/);
+	        # store first token of interface name
+    	    $key1 = shift(@tmp);
+	    }
 
-        # extract values
-        extract($_);
+    	# get RX, TX, collisions and txqueuelen values
+	    # look for 'RX' or 'TX' or 'collisions' text
+    	if (/RX packets/ || /TX packets/ || /collisions/){
 
-        # shift first token of 'RX' or 'TX'
-        shift(@tmp) if (/RX packets/ || /TX packets/);
+        	# key2 values
+	        @key2 = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame) if (/RX packets/);
+    	    @key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
+        	@key2 = qw(collisions txqueuelen) if (/collisions/);
 
-        # build hash
-        build();
-    }
+	        # extract values
+    	    extract($_);
+
+        	# shift first token of 'RX' or 'TX'
+	        shift(@tmp) if (/RX packets/ || /TX packets/);
+
+    	    # build values hash
+        	build();
+	    }
+	}
 }
 
 # extract values
 sub extract {
 
+	# ifconfig output line
     my $line = shift;
 
     # remove spaces
@@ -73,10 +81,16 @@ sub extract {
 # build values hash
 sub build {
 
+	# values type count
     my $i = 0;
 
+	# loop through value types
     for (@key2){
+	
+		# build hash with interface name, value type, and value
         $interfaces{$key1}{$_} = $tmp[$i];
+
+		# increment values type count
         $i++;
     }
 }
@@ -94,27 +108,44 @@ sub validate {
 # create new Net::Int::Stats object
 sub new {
 
+	# class name
     my $class = shift;
+
+	# allocate object memory
     my $self  = {};
 
+	# assign object reference to class
     bless($self, $class);
-    $self->{VALUE} = '';
 
+	# initialize values reference
+    $self->{VALUES} = '';
+
+	# return object reference
     return $self;
 }
 
 # get specific ifconfig value for specific interface
 sub value {
 
+	# object reference
     my $self = shift;
+
+	# interface name
     my $int  = shift;
+
+	# value type
     my $type = shift;
 
     # validate if supplied interface is present
     validate($int);
 
+	# generate value data
+	data();
+
+	# user specified value
     $self->{VALUES} = $interfaces{$int}{$type};
 
+	# return value
     return $self->{VALUES};
 }
 
@@ -174,8 +205,8 @@ linux command /sbin/ifconfig
 =head1 NOTES
 
 ifconfig output contains more information than the values that are
-extracted in this module. More values can be added if there are any 
-requests to do so.   
+extracted in this module. More values and/or support for other
+operating systems can be added if there are any requests to do so.   
 
 =head1 AUTHOR
 
