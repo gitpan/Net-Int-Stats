@@ -41,3 +41,8 @@ Revision history for Perl extension Net::Int::Stats.
 	- added more comments
 	- refactored part of code that generates the values data
 	- placed in it's own subroutine: data()
+
+2.05 Sun Jul  3 18:02:40 PDT 2011
+	- no functionality changes
+	- fixed pesky space/tab issue formatting in code and comments
+	- doesn't affect anything other than readability
