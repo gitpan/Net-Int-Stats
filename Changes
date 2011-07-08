@@ -46,3 +46,10 @@ Revision history for Perl extension Net::Int::Stats.
 	- no functionality changes
 	- fixed pesky space/tab issue formatting in code and comments
 	- doesn't affect anything other than readability
+
+2.06 Fri Jul  8 13:57:07 PDT 2011
+	- fixed a bug introduced in v2.04
+	- the new data() subroutine added to the value() method was
+	- being called after the validate() subroutine causing validation
+	- against an empty list
+	- fixed by calling data() before validate()

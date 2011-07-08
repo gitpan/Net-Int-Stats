@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.05';
+our $VERSION = '2.06';
 
 use strict;
 use warnings;
@@ -102,7 +102,7 @@ sub validate {
     my $int = shift;
 
     # terminate program if specified interface name is not in ifconfig output
-    die "specified interface $int not listed in ifconfig!\n" if !(grep(/$int/, keys %interfaces));
+    die "specified interface $int not listed in ifconfig output!\n" if !(grep(/$int/, keys %interfaces));
 }
 
 # create new Net::Int::Stats object
@@ -136,11 +136,11 @@ sub value {
     # value type
     my $type = shift;
 
-    # validate if supplied interface is present
-    validate($int);
-
     # generate value data
     data();
+
+    # validate if supplied interface is present
+    validate($int);
 
     # user specified value
     $self->{VALUES} = $interfaces{$int}{$type};

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Net-Int-Stats
-version:             2.05
+version:             2.06
 abstract:            Reports specific ifconfig values for a network interface
 license:             ~
 author:              
