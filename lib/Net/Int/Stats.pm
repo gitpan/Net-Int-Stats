@@ -1,6 +1,6 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.06';
+our $VERSION = '2.07';
 
 use strict;
 use warnings;

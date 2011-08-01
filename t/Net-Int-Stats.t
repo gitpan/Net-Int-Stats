@@ -6,7 +6,7 @@
 use Test::More tests => 5;
 
 # test if linux platform
-ok($^O =~ /linux/, 'OS check') || BAIL_OUT("Operating system is $^O instead of linux!");
+ok($^O =~ /linux/, 'OS check') || BAIL_OUT("OS unsupported");
 
 # does /sbin/ifconfig exist?
 ok(-e '/sbin/ifconfig', '/sbin/ifconfig test') || BAIL_OUT('Does /sbin/ifconfig exist?'); 

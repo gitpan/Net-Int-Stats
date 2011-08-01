@@ -53,3 +53,12 @@ Revision history for Perl extension Net::Int::Stats.
 	- being called after the validate() subroutine causing validation
 	- against an empty list
 	- fixed by calling data() before validate()
+
+2.07 Mon Aug  1 14:19:08 PDT 2011
+	- no functionality changes
+	- there are FAIL reports for the unsupported operating systems
+	- even though install properly bails out during make test for the
+	- unsupported operating systems
+	- to try to get N/A reports instead of FAIL the bail out text in
+	- the test file has been changed to 'OS unsupported' as per
+	- suggestion in CPAN Testers Wiki
