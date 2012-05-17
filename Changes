@@ -62,3 +62,14 @@ Revision history for Perl extension Net::Int::Stats.
 	- to try to get N/A reports instead of FAIL the bail out text in
 	- the test file has been changed to 'OS unsupported' as per
 	- suggestion in CPAN Testers Wiki
+
+2.1 Wed May 16 16:14:22 PDT 2012
+	- enhancements requests from user bzero
+	- report more values from ifconfig output
+	- new values added: interface IPv4 address
+	- RX and TX bytes
+	- added new method interfaces() to list all
+	- available interfaces
+	- TO DO for next release: redesign and refactor 
+	- code for better efficiency 
+

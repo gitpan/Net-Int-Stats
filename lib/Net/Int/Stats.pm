@@ -1,18 +1,15 @@
 package Net::Int::Stats;
 
-our $VERSION = '2.07';
+our $VERSION = '2.1';
 
 use strict;
 use warnings;
 
 ############ Global Declarations ##############
 
-# store ifconfig output
-my @interface = `/sbin/ifconfig`;
-
 # hash of hashes
 # key1 - interface, key2 - type ex: rx_packets, values ex: 'packets:12345'
-my %interfaces;
+my %interface_values;
 
 # tmp array to store string tokens
 my @tmp;
@@ -28,8 +25,11 @@ my @key2;
 # generate ifconfig values
 sub data {
 
+    # store ifconfig output
+    my @ifconfig_out = `/sbin/ifconfig`;
+
     # loop through each line of ifconfig output
-    foreach (@interface){
+    foreach (@ifconfig_out){
 
         # skip if blank line
         next if /^$/;
@@ -44,20 +44,22 @@ sub data {
             $key1 = shift(@tmp);
         }
 
-        # get RX, TX, collisions and txqueuelen values
-        # look for 'RX' or 'TX' or 'collisions' text
-        if (/RX packets/ || /TX packets/ || /collisions/){
+        # get inet address, RX, TX, collisions and txqueuelen values
+        # look for 'inet addr' or 'RX' or 'TX' or 'collisions' text
+        if (/RX/ || /TX/ || /collisions/ || /inet addr/){
 
             # key2 values
+            @key2 = qw(inet_addr) if (/inet addr/);
             @key2 = qw(rx_packets rx_errors rx_dropped rx_overruns rx_frame) if (/RX packets/);
             @key2 = qw(tx_packets tx_errors tx_dropped tx_overruns tx_carrier) if (/TX packets/);
+			@key2 = qw(rx_bytes tx_bytes) if (/RX bytes/);
             @key2 = qw(collisions txqueuelen) if (/collisions/);
 
             # extract values
             extract($_);
 
-            # shift first token of 'RX' or 'TX'
-            shift(@tmp) if (/RX packets/ || /TX packets/);
+            # shift first token of 'inet' or 'RX' or 'TX'
+            shift(@tmp) if (/inet addr/ || /RX packets/ || /TX packets/);
 
             # build values hash
             build();
@@ -68,7 +70,7 @@ sub data {
 # extract values
 sub extract {
 
-    # ifconfig output line
+    # ifconfig output line with newlines removed
     my $line = shift;
 
     # remove spaces
@@ -76,6 +78,12 @@ sub extract {
 
     # store tokens split on spaces
     @tmp = split (/\s/, $line);
+
+    # check if line is RX or TX bytes
+    if ($line =~ /bytes/){
+        # slice bytes values
+        @tmp = @tmp[1,6];
+    }
 }
 
 # build values hash
@@ -88,7 +96,7 @@ sub build {
     for (@key2){
 	
         # build hash with interface name, value type, and value
-        $interfaces{$key1}{$_} = $tmp[$i];
+        $interface_values{$key1}{$_} = $tmp[$i];
 
         # increment values type count
         $i++;
@@ -102,7 +110,7 @@ sub validate {
     my $int = shift;
 
     # terminate program if specified interface name is not in ifconfig output
-    die "specified interface $int not listed in ifconfig output!\n" if !(grep(/$int/, keys %interfaces));
+    die "specified interface $int not listed in ifconfig output!\n" if !(grep(/$int/, keys %interface_values));
 }
 
 # create new Net::Int::Stats object
@@ -112,13 +120,19 @@ sub new {
     my $class = shift;
 
     # allocate object memory
-    my $self  = {};
+    my $self = {};
 
     # assign object reference to class
     bless($self, $class);
 
     # initialize values reference
     $self->{VALUES} = '';
+
+    # initialize interfaces list reference
+    $self->{INTERFACES} = '';
+
+    # generate value data
+    data();
 
     # return object reference
     return $self;
@@ -131,22 +145,34 @@ sub value {
     my $self = shift;
 
     # interface name
-    my $int  = shift;
+    my $int = shift;
 
     # value type
     my $type = shift;
-
-    # generate value data
-    data();
 
     # validate if supplied interface is present
     validate($int);
 
     # user specified value
-    $self->{VALUES} = $interfaces{$int}{$type};
+    $self->{VALUES} = $interface_values{$int}{$type};
 
     # return value
     return $self->{VALUES};
+}
+
+sub interfaces {
+
+    # object reference
+    my $self = shift;
+
+    # interface list
+    my @int_list = keys %interface_values;
+
+    # interface list reference
+    $self->{INTERFACES} = "@int_list";
+
+    # return value
+    return $self->{INTERFACES};
 }
 
 1;
@@ -163,30 +189,37 @@ Net::Int::Stats - Reports specific ifconfig values for a network interface
 
   my $get = Net::Int::Stats->new();
 
-  # get value for specific interface
+  # get a value for a specific interface
   my $int     = 'eth0';
   my $stat    = 'rx_packets';
   my $packets = $get->value($int, $stat);
 
+  # get a list of all interfaces
+  my @interface_list = $get->interfaces();
+
 =head1 DESCRIPTION
 
-This module provides various statistics generated from the ifconfig command for specific interfaces. 
-RX values consist of packets, errors, dropped, overruns, and frame. TX values consist of packets, 
-errors, dropped, overruns, and carrier. In addition, collisions and txqueuelen are reported. Values 
-are in the format of type:n - ex 'packets:123456'.
+  This module provides a list of all interfaces and various statistics generated from the ifconfig command
+  for specific interfaces. RX values consist of packets, errors, dropped, overruns, frame, and bytes. TX
+  values consist of packets, errors, dropped, overruns, carrier, and bytes. In addition IPv4 address, collisions,
+  and txqueuelen are reported. Values are in the format of type:n - ex 'packets:123456'. The interfaces() method
+  returns a space delimited list of all interfaces. Ex: lo eth0 eth1.
 
 =head1 METHODS
 
-Use this one method to get specific values which requires two arguments: B<value()>.
+Use this method to get specific values which requires two arguments: B<value()>.
 Ex: $packets = $get->value($int, 'rx_packets');
 
 The first argument is the interface and the second is the type value to extract.
 
-RX values - rx_packets, rx_errors, rx_dropped, rx_overruns, rx_frame
+RX values - rx_packets, rx_errors, rx_dropped, rx_overruns, rx_frame, rx_bytes
 
-TX values - tx_packets, tx_errors, tx_dropped, tx_overruns, tx_carrier
+TX values - tx_packets, tx_errors, tx_dropped, tx_overruns, tx_carrier, tx_bytes
 
-Miscellaneous values - collisions, txqueuelen
+Miscellaneous values - collisions, txqueuelen, inet_addr
+
+Use this method to get a list of all interfaces: B<interfaces()>.
+Ex: @interface_list = $get->interfaces();
 
 =head1 DEPENDENCIES
 

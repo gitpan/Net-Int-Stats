@@ -1,4 +1,4 @@
-Net-Int-Stats version 2.07
+Net-Int-Stats version 2.1
 ===========================
 
 NAME
@@ -9,16 +9,21 @@ SYNOPSIS
 
     my $get = Net::Int::Stats->new();
 
-    # get value for specific interface
+    # get a value for a specific interface
     my $int     = 'eth0';
     my $stat	= 'rx_packets';
     my $packets = $get->value($int, $stat);
 
+    # get a list of all interfaces
+    my @interface_list = $get->interfaces();
+
 DESCRIPTION
-    This module provides various statistics generated from the ifconfig command for specific interfaces. 
-    RX values consist of packets, errors, dropped, overruns, and frame. TX values consist of packets, 
-    errors, dropped, overruns, and carrier. In addition, collisions and txqueuelen are reported. Values 
-    are in the format of type:n - ex 'packets:123456'.
+    This module provides a list of all interfaces and various statistics generated from the ifconfig command 
+    for specific interfaces. RX values consist of packets, errors, dropped, overruns, frame, and bytes. TX 
+    values consist of packets, errors, dropped, overruns, carrier, and bytes. In addition IPv4 address, collisions, 
+    and txqueuelen are reported. Values are in the format of type:n - ex 'packets:123456'. The interfaces() method 
+    returns a space delimited list of all interfaces. Ex: lo eth0 eth1.
+    
 
 INSTALLATION
 
